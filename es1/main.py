@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.tsa.tsatools import detrend
 
 # Data import
 df = pd.read_csv("seriefit2021.csv")
@@ -86,35 +87,34 @@ plt.show()
 ds = df[df.columns[1]]  # Convert to series. Perché il decompose accetta solo una data series e non una colonna di
 # data frame.
 
-# Con il tipo di elongazione iniziale dei massimi e minimi e quelli che abbiamo verso la fine, allora possiamo
+# Con il tipo di elongazione iniziale dei massimi e minimi e quelli che abbiamo verso la fine, possiamo
 # dire che quello moltiplicativo è il modello migliore per eliminare l'effetto del trend. Questo perché
 # il modello moltiplicativo moltiplica le elongazioni per il valore del trend,
 # quindi se ci sono valori piccoli allora può moltiplicare per un valore piccolo e viceversa.
-# Nel nostro caso le variazioni stagioni Sono piccoli in corrispondenza di dati piccoli e viceversa.Quindi il modello
+# Nel nostro caso le variazioni stagionali sono piccoli in corrispondenza di dati piccoli e viceversa. Quindi il modello
 # Moltiplicativo risulta essere la scelta migliore.
 
 # Il modello additivo farebbe fatica a catturare questa variazione dell'elongazione in quanto
 # aggiunge una certa quantità. E se la quantità è uguale aggiunge una quantità sempre uguale e quindi si avrebbero
 # degli scostamenti sempre uguali.
 
+# I nostri dati sono aggregati per mese e quindi valutiamo su un period di 1 anno, quindi 12 mesi.
 result_additive = seasonal_decompose(ds, model='additive', period=12)
 result_additive.plot()
 plt.title("Additive model")
 plt.show()
 
-# I nostri dati sono aggregati per mese e quindi valutiamo su un period di 1 anno, quindi 12 mesi.
 result_multiplicative = seasonal_decompose(ds, model='multiplicative', period=12)
 result_multiplicative.plot()
 plt.title("Multiplicative model")
 plt.show()
 
-# Trend
-plt.plot(x, result_multiplicative.trend, color="blue", label="Trend")
-
 # Detrend
-# Prendo i dati originali e rimuovo il trend
-detrend = y - result_multiplicative.trend
+trendp = result_multiplicative.trend
+detrend = [y[i] - trendp[i] for i in range(0, len(y))]
+plt.plot(x, result_multiplicative.trend, color="blue", label="Trend")
 plt.plot(x, detrend, color="red", label="Detrend")
+plt.title("Trend vs Detrend")
 plt.show()
 
 residue = result_multiplicative.resid
@@ -127,9 +127,12 @@ sm.graphics.tsa.plot_acf(diff_data, lags=36)
 plt.show()
 
 # residuo e stagionalità
+# data = stagionalità * trend * rumore
+# Per rimuovere la stagionalità divido i dati per la stagionalità
 deseasonalized = y / result_multiplicative.seasonal
 plt.plot(x, deseasonalized, color="red")
-plt.legend("Deseasonalized")
+plt.title("Deseasonalized")
+plt.legend("Destagionalizzato")
 plt.show()
 
 # Dall'ACF possiamo dedurre che è già destagionalizzato.
