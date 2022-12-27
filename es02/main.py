@@ -283,15 +283,9 @@ mdl.fit(trainX, trainY)
 trainPredict = mdl.predict(trainX)
 testForecast = mdl.predict(testX)
 
-result = testForecast
-for n in np.linspace(0, 23, 24):
-    np.append(result, model.predict(np.asarray([[result[-2:-1], result[-1:]]],
-                                               dtype="float32")))
-
 plt.plot(dataset)
 plt.plot(np.concatenate((np.full(look_back - 1, np.nan), trainPredict)))
 plt.plot(np.concatenate((np.full(len(train) - 1, np.nan), testForecast)))
-plt.plot(np.concatenate((np.full(len(train) + 11, np.nan), result)))
 plt.title('MACHINE LEARNING METHOD')
 plt.show()
 
