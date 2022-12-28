@@ -4,14 +4,14 @@ import numpy as np
 import pandas as pd
 import pmdarima as pm
 import statsmodels.api as sm
+from keras.layers import Dense  # pip install tensorflow (as administrator)
+from keras.models import Sequential  # pip install keras
 from matplotlib import pyplot as plt
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.tsa.stattools import acf
-from keras.models import Sequential  # pip install keras
-from keras.layers import Dense  # pip install tensorflow (as administrator)
-from sklearn.metrics import mean_absolute_error
 
 # Data Upload
 df = pd.read_csv("serieFcast2021.csv")
@@ -287,7 +287,8 @@ plt.plot(dataset)
 plt.plot(np.concatenate((np.full(look_back - 1, np.nan), trainPredict)))
 plt.plot(np.concatenate((np.full(len(train) - 1, np.nan), testForecast)))
 plt.title('MACHINE LEARNING METHOD')
+plt.legend(['Dataset', 'Train Predict', 'Test Forecast'])
 plt.show()
 
-mse = mean_absolute_error(testY, testForecast)
-print("MSE = {}".format(mse))
+print("MSE={}".format(mean_absolute_error(testY, testForecast)))
+
